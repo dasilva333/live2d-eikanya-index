@@ -465,6 +465,19 @@
             gap: 10px;
         }
 
+        .card-category-header {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-gold);
+            font-weight: 700;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0.85;
+        }
+
         .card-name {
             font-weight: 600;
             font-size: 0.95rem;
@@ -1052,12 +1065,20 @@
                 const badgeClass = item.type === 'moc3' ? 'pill-moc3' : 'pill-moc';
                 const thumbnailSrc = item.hasThumbnail ? `thumbnails/${item.slug}.png` : 'fallback.png';
 
+                // Get translated franchise label
+                const meta = franchiseMetadata[item.franchise] || { name: item.franchise };
+                // Render category label if viewing all models globally
+                const categoryHeaderHtml = !currentFranchise 
+                    ? `<div class="card-category-header" title="${meta.name}">${meta.name}</div>` 
+                    : '';
+
                 card.innerHTML = `
                     <div class="card-img-container">
                         <span class="card-format-badge ${badgeClass}">${item.type}</span>
                         <img src="${thumbnailSrc}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23143537%22/><text x=%2250%22 y=%2255%22 font-family=%22Outfit%22 font-size=%2212%22 fill=%22%23d4af37%22 text-anchor=%22middle%22>No Preview</text></svg>'">
                     </div>
                     <div class="card-info">
+                        ${categoryHeaderHtml}
                         <div class="card-name" title="${item.name}">${item.name}</div>
                         <button class="btn-download" onclick="downloadAssets(event, '${item.slug}')">
                             <span>📦 Download Package</span>
