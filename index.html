@@ -175,6 +175,7 @@
             background: linear-gradient(90deg, var(--accent-teal), var(--accent-gold));
             opacity: 0;
             transition: opacity 0.3s ease;
+            z-index: 3;
         }
 
         .franchise-card:hover {
@@ -185,6 +186,49 @@
 
         .franchise-card:hover::before {
             opacity: 1;
+        }
+
+        .franchise-card-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            flex: 1;
+            padding-right: 90px;
+        }
+
+        .franchise-card-image-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 140px;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+        }
+
+        .franchise-card-bg-img {
+            height: 85%;
+            width: auto;
+            object-fit: contain;
+            opacity: 0.25;
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+            -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+        }
+
+        .franchise-card:hover .franchise-card-bg-img {
+            opacity: 0.75;
+            transform: scale(1.12) translateY(-5px);
+            filter: drop-shadow(0 6px 15px rgba(212, 175, 55, 0.25));
         }
 
         .franchise-header {
@@ -702,28 +746,43 @@
             sortedFranchises.forEach(group => {
                 const meta = franchiseMetadata[group.rawName] || { name: group.rawName, desc: 'Preserved community assets and animations.', tags: [] };
                 
+                // Get all models in this franchise that have thumbnails
+                const groupModels = characterList.filter(item => item.franchise === group.rawName && item.hasThumbnail);
+                let randomThumb = '';
+                if (groupModels.length > 0) {
+                    const randomModel = groupModels[Math.floor(Math.random() * groupModels.length)];
+                    randomThumb = `thumbnails/${randomModel.slug}.png`;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'franchise-card';
                 card.onclick = () => showGalleryForFranchise(group.rawName);
 
                 card.innerHTML = `
-                    <div>
-                        <div class="franchise-header">
-                            <div>
-                                <span class="franchise-title">${meta.name}</span>
-                                <span class="franchise-original" style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 4px;">Folder: ${group.rawName}</span>
+                    <div class="franchise-card-content">
+                        <div>
+                            <div class="franchise-header">
+                                <div>
+                                    <span class="franchise-title">${meta.name}</span>
+                                    <span class="franchise-original" style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 4px;">Folder: ${group.rawName}</span>
+                                </div>
+                                <span class="franchise-count-badge">${group.total}</span>
                             </div>
-                            <span class="franchise-count-badge">${group.total}</span>
+                            <p class="franchise-desc">${meta.desc}</p>
                         </div>
-                        <p class="franchise-desc">${meta.desc}</p>
-                    </div>
-                    <div class="franchise-footer">
-                        <div class="format-pills">
-                            ${group.moc3 > 0 ? `<span class="pill pill-moc3">${group.moc3} moc3</span>` : ''}
-                            ${group.moc > 0 ? `<span class="pill pill-moc">${group.moc} moc</span>` : ''}
+                        <div class="franchise-footer">
+                            <div class="format-pills">
+                                ${group.moc3 > 0 ? `<span class="pill pill-moc3">${group.moc3} moc3</span>` : ''}
+                                ${group.moc > 0 ? `<span class="pill pill-moc">${group.moc} moc</span>` : ''}
+                            </div>
+                            <span class="enter-link">Explore →</span>
                         </div>
-                        <span class="enter-link">Explore →</span>
                     </div>
+                    ${randomThumb ? `
+                    <div class="franchise-card-image-container">
+                        <img src="${randomThumb}" alt="Preview" class="franchise-card-bg-img" loading="lazy">
+                    </div>
+                    ` : ''}
                 `;
                 franchiseHub.appendChild(card);
             });
