@@ -382,7 +382,7 @@
             gap: 10px;
         }
 
-        .filter-btn {
+        .filter-btn, .limit-btn {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
             color: var(--text-muted);
@@ -395,7 +395,7 @@
             transition: all 0.3s ease;
         }
 
-        .filter-btn.active, .filter-btn:hover {
+        .filter-btn.active, .filter-btn:hover, .limit-btn.active, .limit-btn:hover {
             border-color: var(--accent-gold);
             color: var(--accent-gold);
             background: rgba(212, 175, 55, 0.08);
@@ -705,10 +705,17 @@
                     <div class="search-wrapper">
                         <input type="text" id="gallery-search" class="search-input" placeholder="Search by name or slug...">
                     </div>
-                    <div class="filter-group">
-                        <button class="filter-btn active" data-type="all">All</button>
-                        <button class="filter-btn" data-type="moc3">moc3</button>
-                        <button class="filter-btn" data-type="moc">moc</button>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-type="all">All</button>
+                            <button class="filter-btn" data-type="moc3">moc3</button>
+                            <button class="filter-btn" data-type="moc">moc</button>
+                        </div>
+                        <div class="filter-group page-limit-group">
+                            <button class="limit-btn active" data-limit="50">50</button>
+                            <button class="limit-btn" data-limit="100">100</button>
+                            <button class="limit-btn" data-limit="200">200</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -780,7 +787,7 @@
         let currentFormatFilter = 'all'; // all, moc3, moc
         let currentSearchQuery = '';
         let currentPage = 1;
-        const ITEMS_PER_PAGE = 40;
+        let itemsPerPage = 50;
 
         // Hardcoded curated descriptions for franchises
         const franchiseMetadata = {
@@ -1015,13 +1022,13 @@
 
             // Paginate
             const totalItems = filtered.length;
-            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
 
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
             const pageItems = filtered.slice(startIndex, endIndex);
 
             // Update page pagination display info
@@ -1180,6 +1187,19 @@
                 btn.classList.add('active');
                 
                 currentFormatFilter = btn.dataset.type;
+                currentPage = 1;
+                updateGalleryGrid();
+            });
+        });
+
+        // Limit trigger events
+        const limitBtns = document.querySelectorAll('.page-limit-group .limit-btn');
+        limitBtns.forEach(btn => {
+            btn.addEventListener('click', e => {
+                limitBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                itemsPerPage = parseInt(btn.dataset.limit, 10);
                 currentPage = 1;
                 updateGalleryGrid();
             });
